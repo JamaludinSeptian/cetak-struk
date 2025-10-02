@@ -161,13 +161,11 @@
         if (logoBase64) {
           content.push({
             image: logoBase64,
-            width: 40, // ukuran logo kecil
+            width: 60, // ukuran logo kecil
             alignment: 'center',
-            margin: [0, 0, 0, 5]
           });
         }
 
-        content.push({ text: 'PERTAMINA', alignment: 'center', bold: true });
         content.push({ text: data.spbu, alignment: 'center' });
         content.push({ text: data.alamat, alignment: 'center', margin: [0,0,0,5] });
 
@@ -190,16 +188,13 @@
         content.push({ text: '-----------------------------------------------------', margin: [0,0,0,5] });
 
         content.push({
-          text: `\nAYO PATUHI 5M : MEMAKAI MASKER,
-                        MENCUCI TANGAN, MENJAGA JARAK,
-                        MEMBATASI KERUMUNAN & MOBILITAS
-                        TERIMA KASIH`,
+          text: `\nTERIMA KASIH DAN SELAMAT JALAN\n`,
           fontSize: 7,
           alignment: 'center'
         });
 
         let docDefinition = {
-          pageSize: { width: 165, height: 'auto' }, // 58mm ≈ 165pt
+          pageSize: { width: 155, height: 'auto' }, // 58mm ≈ 165pt
           pageMargins: [10, 5, 10, 5],
           content: content,
           defaultStyle: {
