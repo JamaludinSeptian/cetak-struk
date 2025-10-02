@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <title>Aplikasi Cetak Struk SPBU (PDF dengan Logo)</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>
+</head>
+<body class="bg-gray-100 p-4 font-mono">
+
+  <!-- Logo disembunyikan, nanti diambil & dikonversi ke base64 -->
+  <img id="logo" src="image/logo.png" style="display:none;" />
+
+  <h2 class="text-center text-xl font-bold mb-4">Form Input Struk SPBU</h2>
+  
+  <div class="max-w-md mx-auto bg-white shadow p-4 rounded-lg mb-6">
+    <form id="receiptForm" class="space-y-3">
+      <div>
+        <label class="block text-sm">Nomor SPBU</label>
+        <input type="text" name="spbu" value="34.40111" class="w-full border p-1 rounded">
+      </div>
+      <div>
+        <label class="block text-sm">Alamat</label>
+        <input type="text" name="alamat" value="Jl. Cipaganti, Pasteur Sukajadi, Bandung" class="w-full border p-1 rounded">
+      </div>
+      <div>
+        <label class="block text-sm">Shift</label>
+        <input type="number" name="shift" value="2" class="w-full border p-1 rounded">
+      </div>
+      <div>
+        <label class="block text-sm">No Transaksi</label>
+        <input type="text" id="transaksi" name="transaksi" value="" class="w-full border p-1 rounded" placeholder="otomatis 6 digit saat buat struk">
+      </div>
+      <div>
+        <label class="block text-sm">Waktu</label>
+        <input type="datetime-local" id="waktuInput" name="waktu" class="w-full border p-1 rounded">
+      </div>
+      <div>
+        <label class="block text-sm">Pulau/Pompa</label>
+        <input type="text" name="pompa" value="11" class="w-full border p-1 rounded">
+      </div>
+      <div>
+        <label class="block text-sm">Produk</label>
+        <input type="text" name="produk" value="PERTAMAX" class="w-full border p-1 rounded">
+      </div>
+      <div>
+        <label class="block text-sm">Harga per Liter</label>
+        <input type="number" id="harga" name="harga" value="9000" class="w-full border p-1 rounded">
+      </div>
+      <div>
+        <label class="block text-sm">Volume (Liter)</label>
+        <input type="number" step="0.01" id="volume" name="volume" value="27.77" class="w-full border p-1 rounded">
+      </div>
+      <div>
+        <label class="block text-sm">Total Harga</label>
+        <input type="number" id="total" name="total" value="250000" class="w-full border p-1 rounded">
+      </div>
+      <div>
+        <label class="block text-sm">Operator</label>
+        <input type="text" name="operator" value="TITIN" class="w-full border p-1 rounded">
+      </div>
+
+      <div class="flex gap-2">
+        <button type="button" onclick="generateReceipt()" class="bg-blue-600 text-white px-3 py-1 rounded">Buat Struk PDF</button>
+        <button type="button" onclick="generateReceipt(true)" class="bg-green-600 text-white px-3 py-1 rounded">Download PDF</button>
+      </div>
+    </form>
+  </div>
+
+  <script>
+    const hargaInput = document.getElementById("harga");
+    const volumeInput = document.getElementById("volume");
+    const totalInput = document.getElementById("total");
+    const transaksiInput = document.getElementById("transaksi");
+    const waktuInput = document.getElementById("waktuInput"); 
+
+    function hitungTotal() {
+      let harga = parseFloat(hargaInput.value) || 0;
+      let volume = parseFloat(volumeInput.value) || 0;
+      let total = harga * volume;
+      totalInput.value = Math.round(total);
+    }
+    hargaInput.addEventListener("input", hitungTotal);
+    volumeInput.addEventListener("input", hitungTotal);
+
+    // fungsi buat nomor transaksi 6 digit sederhana
+    function generateNoTransaksi6() {
+      const num = Math.floor(100000 + Math.random() * 900000); // 100000..999999
+      return String(num);
+    }
+
+    function toDatetimeLocal(date) {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        const hour = String(date.getHours()).padStart(2, '0');
+        const minute = String(date.getMinutes()).padStart(2, '0');
+        return `${year}-${month}-${day}T${hour}:${minute}`;
+    }
+
+    // fungsi konversi img ke base64 (simple, bisa gagal jika cross-origin)
+    function getBase64Image(img) {
+      const canvas = document.createElement("canvas");
+      canvas.width = img.naturalWidth || img.width;
+      canvas.height = img.naturalHeight || img.height;
+      const ctx = canvas.getContext("2d");
+      ctx.drawImage(img, 0, 0);
+      return canvas.toDataURL("image/png");
+    }
+
+    /**
+     * generateReceipt(downloadOnly = false)
+     * - jika downloadOnly === true maka akan memanggil download('struk.pdf')
+     * - jika false maka akan open() preview di tab baru
+     */
+    function generateReceipt(downloadOnly = false) {
+        // selalu generate nomor transaksi 6 digit baru saat membuat struk
+        transaksiInput.value = generateNoTransaksi6();
+
+        if (!waktuInput.value) {
+            const now = new Date();
+            waktuInput.value = toDatetimeLocal(now); 
+        }
+
+        const form = document.getElementById("receiptForm");
+        const data = Object.fromEntries(new FormData(form).entries());
+
+        // parse waktu
+        let waktu = new Date(data.waktu);
+        // Format tanggal dd/MM/yyyy
+        let tanggal = waktu.toLocaleDateString("id-ID", {
+            day: '2-digit', month: '2-digit', year: 'numeric'
+        }); 
+        // Format jam hh:mm:ss (24 jam)
+        let jamMenitDetik = waktu.toLocaleTimeString("id-ID", {
+            hour: '2-digit', minute: '2-digit', second: '2-digit', hourCycle: 'h23'
+        }).replace(/\./g, ':'); 
+
+        // Hasil akhir => 03/10/2025  23:15:42  (dua spasi antara tanggal & jam)
+        let waktuTampil = `${tanggal}  ${jamMenitDetik}`;  
+
+        const formatRupiah = (number) => Number(number).toLocaleString("id-ID");
+
+        // Ambil logo base64 jika memungkinkan; jika gagal, lewati
+        let logoBase64 = null;
+        try {
+          const logoImg = document.getElementById("logo");
+          if (logoImg && (logoImg.complete || logoImg.naturalWidth)) {
+            logoBase64 = getBase64Image(logoImg);
+          }
+        } catch (e) {
+          // gagal konversi (mis. CORS) -> biarkan logoBase64 null
+          console.warn("Logo conversion failed:", e);
+          logoBase64 = null;
+        }
+
+        // Definisi dokumen PDF pakai pdfMake
+        let content = [];
+
+        if (logoBase64) {
+          content.push({
+            image: logoBase64,
+            width: 40, // ukuran logo kecil
+            alignment: 'center',
+            margin: [0, 0, 0, 5]
+          });
+        }
+
+        content.push({ text: 'PERTAMINA', alignment: 'center', bold: true });
+        content.push({ text: data.spbu, alignment: 'center' });
+        content.push({ text: data.alamat, alignment: 'center', margin: [0,0,0,5] });
+
+        content.push({ text: `Shift    :   ${data.shift}      No Trans: ${data.transaksi}` });
+        content.push({ text: `Waktu :   ${waktuTampil}`, margin: [0,0,0,5] });
+        content.push({ text: '------------------------------------------------------' });
+
+        content.push({ text: `Pulau/Pompa :   ${data.pompa}` });
+        content.push({ text: `Nama Produk :   ${data.produk}` });
+        content.push({ text: `Harga/Liter     :   Rp. ${formatRupiah(data.harga)}` });
+
+        // Volume ditampilkan dengan angka merah & bold
+         content.push({ text: `Harga/Liter     :   (L) ${data.volume.toString()}` });
+
+        content.push({ text: `Total Harga     :   Rp. ${formatRupiah(data.total)}` });
+        content.push({ text: `Operator          :   ${data.operator}`, margin: [0,0,0,5] });
+
+        content.push({ text: '-----------------------------------------------------' });
+        content.push({ text: `CASH                     Rp. ${formatRupiah(data.total)}` });
+        content.push({ text: '-----------------------------------------------------', margin: [0,0,0,5] });
+
+        content.push({
+          text: `\nAYO PATUHI 5M : MEMAKAI MASKER,
+                        MENCUCI TANGAN, MENJAGA JARAK,
+                        MEMBATASI KERUMUNAN & MOBILITAS
+                        TERIMA KASIH`,
+          fontSize: 7,
+          alignment: 'center'
+        });
+
+        let docDefinition = {
+          pageSize: { width: 165, height: 'auto' }, // 58mm ≈ 165pt
+          pageMargins: [10, 5, 10, 5],
+          content: content,
+          defaultStyle: {
+            fontSize: 9
+          }
+        };
+
+        const pdfDoc = pdfMake.createPdf(docDefinition);
+        if (downloadOnly) {
+          pdfDoc.download('struk.pdf');
+        } else {
+          pdfDoc.open();
+        }
+    }
+  </script>
+</body>
+</html>
