@@ -161,7 +161,7 @@
         if (logoBase64) {
           content.push({
             image: logoBase64,
-            width: 100, // ukuran logo kecil
+            width: 60, // ukuran logo kecil
             alignment: 'center',
           });
         }
@@ -189,20 +189,16 @@
 
         content.push({
           text: `\nTERIMA KASIH DAN SELAMAT JALAN\n`,
-          fontSize: 20,
-          margin: [0,0,0,5],
+          fontSize: 7,
           alignment: 'center'
         });
-        content.push({ text: '' });
-       
-        content.push({ text: '', margin: [0,0,0,5] });
 
         let docDefinition = {
-          pageSize: { width: 200, height: 'auto' }, // 58mm ≈ 165pt
-          pageMargins: [0, 0, 0, 50],
+          pageSize: { width: 155, height: 'auto' }, // 58mm ≈ 165pt
+          pageMargins: [10, 5, 10, 5],
           content: content,
           defaultStyle: {
-            fontSize: 40
+            fontSize: 20
           }
         };
 
