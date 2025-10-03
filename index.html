@@ -161,7 +161,7 @@
         if (logoBase64) {
           content.push({
             image: logoBase64,
-            width: 250, // ukuran logo kecil
+            width: 350, // ukuran logo kecil
             alignment: 'center',
           });
         }
@@ -193,12 +193,14 @@
           alignment: 'center'
         });
 
-        let docDefinition = {
-         
+       let docDefinition = {
+          pageSize: {
+            height: 'auto'   // tinggi otomatis menyesuaikan isi struk
+          },
           pageMargins: [10, 5, 10, 5],
           content: content,
           defaultStyle: {
-            fontSize: 40
+            fontSize: 38
           }
         };
 
@@ -212,5 +214,6 @@
   </script>
 </body>
 </html>
+
 
 
