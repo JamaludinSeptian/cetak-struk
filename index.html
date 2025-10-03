@@ -9,7 +9,7 @@
 </head>
 <body class="bg-gray-100 p-4 font-mono">
 
-  <!-- Logo disembunyikan, nanti diambil & dikonversi ke base64 -->
+  <!-- Logo (disembunyikan, nanti dikonversi base64) -->
   <img id="logo" src="image/logo.png" style="display:none;" />
 
   <h2 class="text-center text-xl font-bold mb-4">Form Input Struk SPBU</h2>
@@ -84,9 +84,9 @@
     hargaInput.addEventListener("input", hitungTotal);
     volumeInput.addEventListener("input", hitungTotal);
 
-    // fungsi buat nomor transaksi 6 digit sederhana
+    // Nomor transaksi 6 digit
     function generateNoTransaksi6() {
-      const num = Math.floor(100000 + Math.random() * 900000); // 100000..999999
+      const num = Math.floor(100000 + Math.random() * 900000);
       return String(num);
     }
 
@@ -99,7 +99,7 @@
         return `${year}-${month}-${day}T${hour}:${minute}`;
     }
 
-    // fungsi konversi img ke base64 (simple, bisa gagal jika cross-origin)
+    // Konversi img ke base64
     function getBase64Image(img) {
       const canvas = document.createElement("canvas");
       canvas.width = img.naturalWidth || img.width;
@@ -109,13 +109,17 @@
       return canvas.toDataURL("image/png");
     }
 
-    /**
-     * generateReceipt(downloadOnly = false)
-     * - jika downloadOnly === true maka akan memanggil download('struk.pdf')
-     * - jika false maka akan open() preview di tab baru
-     */
+    // Format angka ke Rupiah
+    const formatRupiah = (number) => {
+      return "Rp. " + Number(number).toLocaleString("id-ID");
+    };
+
+    // Format volume pakai koma
+    const formatVolume = (val) => {
+      return Number(val).toFixed(2).replace(".", ",");
+    };
+
     function generateReceipt(downloadOnly = false) {
-        // selalu generate nomor transaksi 6 digit baru saat membuat struk
         transaksiInput.value = generateNoTransaksi6();
 
         if (!waktuInput.value) {
@@ -126,23 +130,16 @@
         const form = document.getElementById("receiptForm");
         const data = Object.fromEntries(new FormData(form).entries());
 
-        // parse waktu
         let waktu = new Date(data.waktu);
-        // Format tanggal dd/MM/yyyy
         let tanggal = waktu.toLocaleDateString("id-ID", {
             day: '2-digit', month: '2-digit', year: 'numeric'
         }); 
-        // Format jam hh:mm:ss (24 jam)
         let jamMenitDetik = waktu.toLocaleTimeString("id-ID", {
             hour: '2-digit', minute: '2-digit', second: '2-digit', hourCycle: 'h23'
         }).replace(/\./g, ':'); 
-
-        // Hasil akhir => 03/10/2025  23:15:42  (dua spasi antara tanggal & jam)
         let waktuTampil = `${tanggal}  ${jamMenitDetik}`;  
 
-        const formatRupiah = (number) => Number(number).toLocaleString("id-ID");
-
-        // Ambil logo base64 jika memungkinkan; jika gagal, lewati
+        // Ambil logo base64
         let logoBase64 = null;
         try {
           const logoImg = document.getElementById("logo");
@@ -150,50 +147,43 @@
             logoBase64 = getBase64Image(logoImg);
           }
         } catch (e) {
-          // gagal konversi (mis. CORS) -> biarkan logoBase64 null
-          console.warn("Logo conversion failed:", e);
           logoBase64 = null;
         }
 
-        // Definisi dokumen PDF pakai pdfMake
         let content = [];
-
         if (logoBase64) {
           content.push({
             image: logoBase64,
-            width: 200, // ukuran logo kecil
+            width: 200,
             alignment: 'center',
           });
         }
 
-        content.push({ text: data.spbu, alignment: 'center' });
+        content.push({ text: data.spbu, alignment: 'center', bold: true });
         content.push({ text: data.alamat, alignment: 'center', margin: [0,0,0,5] });
 
-        content.push({ text: `Shift    :   ${data.shift}      No Trans: ${data.transaksi}` });
-        content.push({ text: `Waktu :   ${waktuTampil}`, margin: [0,0,0,5] });
-        content.push({ text: '------------------------------------------------------' });
+        content.push({ text: `Shift : ${data.shift}     No Trans: ${data.transaksi}` });
+        content.push({ text: `Waktu : ${waktuTampil}`, margin: [0,0,0,5] });
+        content.push({ text: '------------------------------------------' });
 
-        content.push({ text: `Pulau/Pompa :   ${data.pompa}` });
-        content.push({ text: `Nama Produk :   ${data.produk}` });
-        content.push({ text: `Harga/Liter     :   Rp. ${formatRupiah(data.harga)}` });
+        content.push({ text: `Pulau/Pompa : ${data.pompa}` });
+        content.push({ text: `Produk      : ${data.produk}` });
+        content.push({ text: `Harga/Liter : ${formatRupiah(data.harga)}` });
+        content.push({ text: `Volume (L)  : ${formatVolume(data.volume)}` });
+        content.push({ text: `Total Harga : ${formatRupiah(data.total)}` });
+        content.push({ text: `Operator    : ${data.operator}`, margin: [0,0,0,5] });
 
-        // Volume ditampilkan dengan angka merah & bold
-         content.push({ text: `Harga/Liter     :   (L) ${data.volume.toString()}` });
-
-        content.push({ text: `Total Harga     :   Rp. ${formatRupiah(data.total)}` });
-        content.push({ text: `Operator          :   ${data.operator}`, margin: [0,0,0,5] });
-
-        content.push({ text: '-----------------------------------------------------' });
-        content.push({ text: `CASH                     Rp. ${formatRupiah(data.total)}` });
-        content.push({ text: '-----------------------------------------------------', margin: [0,0,0,5] });
+        content.push({ text: '------------------------------------------' });
+        content.push({ text: `CASH        ${formatRupiah(data.total)}` });
+        content.push({ text: '------------------------------------------', margin: [0,0,0,5] });
 
         content.push({
-          text: `\nTERIMA KASIH DAN SELAMAT JALAN\n`,
-          fontSize: 25,
+          text: `\nAYO PATUHI 5M : MEMAKAI MASKER, MENCUCI TANGAN, MENJAGA JARAK MEMBATASI KERUMUNAN & MOBILITAS TERIMA KASIH\n`, 
+          fontSize: 17,
           alignment: 'center'
         });
 
-        let docDefinition = {
+         let docDefinition = {
          
           pageMargins: [10, 0, 10, 30],
           content: content,
@@ -212,10 +202,3 @@
   </script>
 </body>
 </html>
-
-
-
-
-
-
-
