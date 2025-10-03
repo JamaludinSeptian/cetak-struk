@@ -164,7 +164,7 @@
 
         content.push({ text: `Shift : ${data.shift}     No Trans: ${data.transaksi}` });
         content.push({ text: `Waktu : ${waktuTampil}`, margin: [0,0,0,5] });
-        content.push({ text: '------------------------------------------' });
+        content.push({ text: '---------------------------------------------------------------' });
 
         content.push({ text: `Pulau/Pompa : ${data.pompa}` });
         content.push({ text: `Produk      : ${data.produk}` });
@@ -173,19 +173,19 @@
         content.push({ text: `Total Harga : ${formatRupiah(data.total)}` });
         content.push({ text: `Operator    : ${data.operator}`, margin: [0,0,0,5] });
 
-        content.push({ text: '------------------------------------------' });
+        content.push({ text: '---------------------------------------------------------------' });
         content.push({ text: `CASH        ${formatRupiah(data.total)}` });
-        content.push({ text: '------------------------------------------', margin: [0,0,0,5] });
+        content.push({ text: '---------------------------------------------------------------', margin: [0,0,0,5] });
 
         content.push({
           text: `\nAYO PATUHI 5M : MEMAKAI MASKER, MENCUCI TANGAN, MENJAGA JARAK MEMBATASI KERUMUNAN & MOBILITAS TERIMA KASIH\n`, 
-          fontSize: 17,
+          fontSize: 15,
           alignment: 'center'
         });
 
          let docDefinition = {
          
-          pageMargins: [10, 0, 10, 30],
+          pageMargins: [15, 0, 15, 0],
           content: content,
           defaultStyle: {
             fontSize: 32
