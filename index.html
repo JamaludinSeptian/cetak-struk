@@ -154,7 +154,7 @@
         if (logoBase64) {
           content.push({
             image: logoBase64,
-            width: 200,
+            width: 250,
             alignment: 'center',
           });
         }
@@ -167,15 +167,15 @@
         content.push({ text: '---------------------------------------------------------------' });
 
         content.push({ text: `Pulau/Pompa : ${data.pompa}` });
-        content.push({ text: `Produk      : ${data.produk}` });
+        content.push({ text: `Produk         : ${data.produk}` });
         content.push({ text: `Harga/Liter : ${formatRupiah(data.harga)}` });
         content.push({ text: `Volume (L)  : ${formatVolume(data.volume)}` });
         content.push({ text: `Total Harga : ${formatRupiah(data.total)}` });
-        content.push({ text: `Operator    : ${data.operator}`, margin: [0,0,0,5] });
+        content.push({ text: `Operator      : ${data.operator}`, margin: [0,0,0,5] });
 
         content.push({ text: '---------------------------------------------------------------' });
         content.push({ text: `CASH        ${formatRupiah(data.total)}` });
-        content.push({ text: '---------------------------------------------------------------', margin: [0,0,0,5] });
+        content.push({ text: '---------------------------------------------------------------', margin: [0,0,0,0] });
 
         content.push({
           text: `\nAYO PATUHI 5M : MEMAKAI MASKER, MENCUCI TANGAN, MENJAGA JARAK MEMBATASI KERUMUNAN & MOBILITAS TERIMA KASIH\n`, 
@@ -202,4 +202,5 @@
   </script>
 </body>
 </html>
+
 
