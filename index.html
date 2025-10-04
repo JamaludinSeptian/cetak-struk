@@ -171,7 +171,7 @@
         content.push({ text: `Harga/Liter     : ${formatRupiah(data.harga)}` });
         content.push({ text: `Volume (L)      : ${formatVolume(data.volume)}` });
         content.push({ text: `Total Harga     : ${formatRupiah(data.total)}` });
-        content.push({ text: `Operator         : ${data.operator}`, margin: [0,0,0,5] });
+        content.push({ text: `Operator          : ${data.operator}`, margin: [0,0,0,5] });
 
         content.push({ text: '---------------------------------------------------------------' });
         content.push({ text: `CASH        ${formatRupiah(data.total)}` });
@@ -188,7 +188,7 @@
           pageMargins: [15, 0, 15, 20],
           content: content,
           defaultStyle: {
-            fontSize: 32
+            fontSize: 27
           }
         };
 
@@ -202,6 +202,7 @@
   </script>
 </body>
 </html>
+
 
 
 
