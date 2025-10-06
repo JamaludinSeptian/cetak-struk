@@ -110,7 +110,7 @@
 
     // Atur tanggal default ke tanggal dan waktu saat ini, dan atur nomor resi
     function setDefaultValues() {
-        // 1. Set Waktu saat ini jika kosong
+        // 1. Set Waktu saat ini jika kosong (HANYA SAAT LOAD)
         if (!waktuInput.value) {
             waktuInput.value = toDatetimeLocal(new Date());
         }
@@ -141,14 +141,13 @@
     };
 
     function generateReceipt(downloadOnly = false) {
-        // Pastikan Receipt No. di-update sebelum generate
-        if (receiptNoInput.value === "" || receiptNoInput.value === "012218") {
-             receiptNoInput.value = generateRandomReceiptNo();
-        }
-        // Pastikan waktu saat ini digunakan jika kosong
-        if (!waktuInput.value) {
-            waktuInput.value = toDatetimeLocal(new Date());
-        }
+        // FIX 1: UPDATE WAKTU SAAT INI ke input field
+        const now = new Date();
+        waktuInput.value = toDatetimeLocal(now); 
+        
+        // FIX 2: UPDATE RECEIPT NO. OTOMATIS
+        receiptNoInput.value = generateRandomReceiptNo();
+
 
         const form = document.getElementById("receiptForm");
         const data = Object.fromEntries(new FormData(form).entries());
@@ -217,9 +216,16 @@
             ], margin: [0, 0, 0, 25]
         });
 
+        // Bagian terima kasih
+         content.push({
+          text: `TERIMA KASIH\n`, 
+          fontSize: 12, 
+          alignment: 'center'
+        });
+
 
          let docDefinition = {
-          // FIX: Mengatur pageSize ke lebar kertas struk termal (misalnya 264pt atau 70mm)
+          // Mengatur pageSize ke lebar kertas struk termal (misalnya 264pt atau 70mm)
           // dan mengatur tinggi menjadi null (auto)
           pageSize: { width: 264, height: 'auto' }, // Lebar 70mm (~264pt)
           pageMargins: [15, 15, 15, 15], // Margin sekeliling
@@ -232,17 +238,12 @@
         const pdfDoc = pdfMake.createPdf(docDefinition);
         
         if (downloadOnly) {
-          // Download file. Karena pageSize diatur ke 'auto', file PDF akan menyesuaikan
-          // tinggi konten.
+          // Download file
           pdfDoc.download('struk_spbu.pdf');
         } else {
           // Tampilkan di iframe (preview)
           pdfDoc.getDataUrl(dataUrl => {
             previewFrame.src = dataUrl;
-            
-            // NOTE: Meskipun PDF memiliki tinggi auto, iframe perlu bantuan JS 
-            // untuk mengatur tingginya karena masalah cross-origin.
-            // Panggilan resizeIframe() akan menangani ini setelah iframe memuat.
           });
         }
     }
@@ -271,4 +272,3 @@
   </script>
 </body>
 </html>
-
