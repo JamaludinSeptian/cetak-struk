@@ -2,78 +2,124 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8">
-  <title>Aplikasi Cetak Struk SPBU (PDF dengan Logo)</title>
+  <title>Aplikasi Cetak Struk SPBU (PDF)</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>
+  <!-- Atur lebar iframe agar mirip struk -->
+  <style>
+    #pdfPreview {
+      width: 100%;
+      max-width: 380px; /* Lebar khas struk */
+      /* FIX: Mengubah tinggi menjadi auto agar mengikuti konten */
+      height: auto; 
+      min-height: 400px; /* Minimal tinggi agar terlihat */
+      border: 1px solid #ccc;
+      margin: 20px auto;
+      /* Menambahkan padding bawah untuk memberi ruang agar konten PDF tidak terpotong */
+      padding-bottom: 50px; 
+    }
+  </style>
 </head>
 <body class="bg-gray-100 p-4 font-mono">
 
-  <!-- Logo (disembunyikan, nanti dikonversi base64) -->
   <img id="logo" src="image/logo.png" style="display:none;" />
 
-  <h2 class="text-center text-xl font-bold mb-4">Form Input Struk SPBU</h2>
+  <h2 class="text-center text-xl font-bold mb-4">Form Input Struk SPBU (Sesuai Contoh)</h2>
   
   <div class="max-w-md mx-auto bg-white shadow p-4 rounded-lg mb-6">
     <form id="receiptForm" class="space-y-3">
       <div>
         <label class="block text-sm">Nomor SPBU</label>
-        <input type="text" name="spbu" value="34.40111" class="w-full border p-1 rounded">
+        <input type="text" name="spbu" value="SPBU 34. 13810" class="w-full border p-1 rounded">
       </div>
       <div>
         <label class="block text-sm">Alamat</label>
-        <input type="text" name="alamat" value="Jl. Cipaganti, Pasteur Sukajadi, Bandung" class="w-full border p-1 rounded">
+        <input type="text" name="alamat" value="JL RAYA MABES HANKAM" class="w-full border p-1 rounded">
       </div>
       <div>
-        <label class="block text-sm">Shift</label>
-        <input type="number" name="shift" value="2" class="w-full border p-1 rounded">
+        <label class="block text-sm">No. Receipt</label>
+        <!-- Nilai diisi otomatis oleh JavaScript -->
+        <input type="text" id="receiptNo" name="receiptNo" value="" class="w-full border p-1 rounded">
       </div>
       <div>
-        <label class="block text-sm">No Transaksi</label>
-        <input type="text" id="transaksi" name="transaksi" value="" class="w-full border p-1 rounded" placeholder="otomatis 6 digit saat buat struk">
-      </div>
-      <div>
-        <label class="block text-sm">Waktu</label>
+        <label class="block text-sm">Waktu (Tanggal & Jam)</label>
+        <!-- Nilai diisi otomatis oleh JavaScript -->
         <input type="datetime-local" id="waktuInput" name="waktu" class="w-full border p-1 rounded">
       </div>
       <div>
-        <label class="block text-sm">Pulau/Pompa</label>
-        <input type="text" name="pompa" value="11" class="w-full border p-1 rounded">
+        <label class="block text-sm">Nomor Pompa</label>
+        <input type="text" name="pompa" value="05" class="w-full border p-1 rounded">
       </div>
       <div>
-        <label class="block text-sm">Produk</label>
-        <input type="text" name="produk" value="PERTAMAX" class="w-full border p-1 rounded">
+        <label class="block text-sm">Produk (Grade)</label>
+        <input type="text" name="produk" value="PERTALITE" class="w-full border p-1 rounded">
       </div>
       <div>
         <label class="block text-sm">Harga per Liter</label>
-        <input type="number" id="harga" name="harga" value="9000" class="w-full border p-1 rounded">
+        <input type="number" id="harga" name="harga" value="10000" class="w-full border p-1 rounded">
       </div>
       <div>
         <label class="block text-sm">Volume (Liter)</label>
-        <input type="number" step="0.01" id="volume" name="volume" value="27.77" class="w-full border p-1 rounded">
+        <input type="number" step="0.01" id="volume" name="volume" value="29.72" class="w-full border p-1 rounded">
       </div>
       <div>
-        <label class="block text-sm">Total Harga</label>
-        <input type="number" id="total" name="total" value="250000" class="w-full border p-1 rounded">
+        <label class="block text-sm">Total Harga (Amount)</label>
+        <input type="number" id="total" name="total" value="297200" class="w-full border p-1 rounded">
       </div>
       <div>
-        <label class="block text-sm">Operator</label>
-        <input type="text" name="operator" value="TITIN" class="w-full border p-1 rounded">
+        <label class="block text-sm">Nomor Kendaraan</label>
+        <input type="text" name="nopol" value="Not Entered" class="w-full border p-1 rounded">
       </div>
 
       <div class="flex gap-2">
-        <button type="button" onclick="generateReceipt()" class="bg-blue-600 text-white px-3 py-1 rounded">Buat Struk PDF</button>
+        <!-- Tombol "Buat Struk PDF" sekarang menampilkan preview di bawah -->
+        <button type="button" onclick="generateReceipt()" class="bg-blue-600 text-white px-3 py-1 rounded">Preview Struk</button>
         <button type="button" onclick="generateReceipt(true)" class="bg-green-600 text-white px-3 py-1 rounded">Download PDF</button>
       </div>
     </form>
   </div>
+  
+  <h3 class="text-center text-lg font-bold my-4">Preview Struk (Iframe)</h3>
+  <!-- Elemen iframe untuk menampilkan preview PDF -->
+  <iframe id="pdfPreview" title="Struk SPBU Preview"></iframe>
 
   <script>
     const hargaInput = document.getElementById("harga");
     const volumeInput = document.getElementById("volume");
     const totalInput = document.getElementById("total");
-    const transaksiInput = document.getElementById("transaksi");
     const waktuInput = document.getElementById("waktuInput"); 
+    const receiptNoInput = document.getElementById("receiptNo"); // Ambil elemen Receipt No
+    const previewFrame = document.getElementById("pdfPreview");
+
+    // Fungsi untuk menghasilkan Nomor Resi 6 digit acak
+    function generateRandomReceiptNo() {
+        // Hasilkan angka antara 100000 dan 999999
+        return String(Math.floor(100000 + Math.random() * 900000));
+    }
+
+    // Fungsi untuk mengkonversi Date object ke format datetime-local (YYYY-MM-DDTHH:MM)
+    function toDatetimeLocal(date) {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        const hour = String(date.getHours()).padStart(2, '0');
+        const minute = String(date.getMinutes()).padStart(2, '0');
+        return `${year}-${month}-${day}T${hour}:${minute}`;
+    }
+
+    // Atur tanggal default ke tanggal dan waktu saat ini, dan atur nomor resi
+    function setDefaultValues() {
+        // 1. Set Waktu saat ini jika kosong
+        if (!waktuInput.value) {
+            waktuInput.value = toDatetimeLocal(new Date());
+        }
+        // 2. Set Receipt No. otomatis saat load
+        if (!receiptNoInput.value) {
+             receiptNoInput.value = generateRandomReceiptNo();
+        }
+    }
+    setDefaultValues(); // Panggil saat memuat halaman
 
     function hitungTotal() {
       let harga = parseFloat(hargaInput.value) || 0;
@@ -84,128 +130,151 @@
     hargaInput.addEventListener("input", hitungTotal);
     volumeInput.addEventListener("input", hitungTotal);
 
-    // Nomor transaksi 6 digit
-    function generateNoTransaksi6() {
-      const num = Math.floor(100000 + Math.random() * 900000);
-      return String(num);
-    }
-
-    function toDatetimeLocal(date) {
-        const year = date.getFullYear();
-        const month = String(date.getMonth() + 1).padStart(2, '0');
-        const day = String(date.getDate()).padStart(2, '0');
-        const hour = String(date.getHours()).padStart(2, '0');
-        const minute = String(date.getMinutes()).padStart(2, '0');
-        return `${year}-${month}-${day}T${hour}:${minute}`;
-    }
-
-    // Konversi img ke base64
-    function getBase64Image(img) {
-      const canvas = document.createElement("canvas");
-      canvas.width = img.naturalWidth || img.width;
-      canvas.height = img.naturalHeight || img.height;
-      const ctx = canvas.getContext("2d");
-      ctx.drawImage(img, 0, 0);
-      return canvas.toDataURL("image/png");
-    }
-
-    // Format angka ke Rupiah
-    const formatRupiah = (number) => {
-      return "Rp. " + Number(number).toLocaleString("id-ID");
+    // Format angka tanpa pemisah ribuan
+    const formatNumber = (number) => {
+      return Number(number).toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, "");
     };
 
-    // Format volume pakai koma
+    // Format volume pakai titik/koma (sesuai contoh)
     const formatVolume = (val) => {
-      return Number(val).toFixed(2).replace(".", ",");
+      return Number(val).toFixed(2);
     };
 
     function generateReceipt(downloadOnly = false) {
-        transaksiInput.value = generateNoTransaksi6();
-
+        // Pastikan Receipt No. di-update sebelum generate
+        if (receiptNoInput.value === "" || receiptNoInput.value === "012218") {
+             receiptNoInput.value = generateRandomReceiptNo();
+        }
+        // Pastikan waktu saat ini digunakan jika kosong
         if (!waktuInput.value) {
-            const now = new Date();
-            waktuInput.value = toDatetimeLocal(now); 
+            waktuInput.value = toDatetimeLocal(new Date());
         }
 
         const form = document.getElementById("receiptForm");
         const data = Object.fromEntries(new FormData(form).entries());
 
         let waktu = new Date(data.waktu);
-        let tanggal = waktu.toLocaleDateString("id-ID", {
+        let tanggal = waktu.toLocaleDateString("en-GB", {
             day: '2-digit', month: '2-digit', year: 'numeric'
-        }); 
-        let jamMenitDetik = waktu.toLocaleTimeString("id-ID", {
-            hour: '2-digit', minute: '2-digit', second: '2-digit', hourCycle: 'h23'
-        }).replace(/\./g, ':'); 
-        let waktuTampil = `${tanggal}  ${jamMenitDetik}`;  
-
-        // Ambil logo base64
-        let logoBase64 = null;
-        try {
-          const logoImg = document.getElementById("logo");
-          if (logoImg && (logoImg.complete || logoImg.naturalWidth)) {
-            logoBase64 = getBase64Image(logoImg);
-          }
-        } catch (e) {
-          logoBase64 = null;
-        }
+        }).replace(/\//g, '/'); // DD/MM/YYYY
+        let jam = waktu.toLocaleTimeString("id-ID", {
+            hour: '2-digit', minute: '2-digit', hourCycle: 'h23'
+        }).replace(/\./g, ':'); // HH:MM
 
         let content = [];
-        if (logoBase64) {
-          content.push({
-            image: logoBase64,
-            width: 250,
-            alignment: 'center',
-          });
-        }
+        // Header
+        content.push({ text: data.spbu, alignment: 'left', bold: true, margin: [0, 5, 0, 0] });
+        content.push({ text: data.alamat, alignment: 'left', margin: [0, 0, 0, 15] }); // Jarak setelah alamat
 
-        content.push({ text: data.spbu, alignment: 'center', bold: true });
-        content.push({ text: data.alamat, alignment: 'center', margin: [0,0,0,5] });
-
-        content.push({ text: `Shift : ${data.shift}     No Trans: ${data.transaksi}` });
-        content.push({ text: `Waktu : ${waktuTampil}`, margin: [0,0,0,5] });
-        content.push({ text: '---------------------------------------------------------------' });
-
-        content.push({ text: `Pulau/Pompa : ${data.pompa}` });
-        content.push({ text: `Produk             : ${data.produk}` });
-        content.push({ text: `Harga/Liter     : ${formatRupiah(data.harga)}` });
-        content.push({ text: `Volume (L)      : ${formatVolume(data.volume)}` });
-        content.push({ text: `Total Harga     : ${formatRupiah(data.total)}` });
-        content.push({ text: `Operator          : ${data.operator}`, margin: [0,0,0,5] });
-
-        content.push({ text: '---------------------------------------------------------------' });
-        content.push({ text: `CASH        ${formatRupiah(data.total)}` });
-        content.push({ text: '---------------------------------------------------------------', margin: [0,0,0,0] });
-
+        // Tanggal dan Jam
         content.push({
-          text: `\nAYO PATUHI 5M : MEMAKAI MASKER, MENCUCI TANGAN, MENJAGA JARAK MEMBATASI KERUMUNAN & MOBILITAS TERIMA KASIH\n`, 
-          fontSize: 20,
+            columns: [
+                { text: `${tanggal}`, alignment: 'left' },
+                { text: `${jam}`, alignment: 'right' }
+            ], margin: [0, 0, 0, 2]
+        });
+
+        // Jarak setelah No. Receipt
+        content.push({ text: `Receipt No. : ${data.receiptNo}`, margin: [0, 0, 0, 15] });
+
+        // Detail
+        content.push({
+            columns: [
+                { text: 'Pump No.', width: 100 }, 
+                { text: `${data.pompa}`, alignment: 'right' }
+            ]
+        });
+        content.push({
+            columns: [
+                { text: 'Grade', width: 100 },
+                { text: `${data.produk}`, alignment: 'right' }
+            ]
+        });
+        content.push({
+            columns: [
+                { text: 'Volume', width: 100 },
+                { text: `${formatVolume(data.volume)}`, alignment: 'right' }
+            ]
+        });
+        content.push({
+            columns: [
+                { text: 'Unit Price', width: 100 }, 
+                { text: `${formatNumber(data.harga)}`, alignment: 'right' }
+            ]
+        });
+        content.push({
+            columns: [
+                { text: 'Amount', width: 100, bold: true },
+                { text: `${formatNumber(data.total)}`, alignment: 'right', bold: true }
+            ], margin: [0, 0, 0, 10]
+        });
+        
+        // Vehicle No.
+        content.push({
+            columns: [
+                { text: 'Vehicle No.', width: 100 }, 
+                { text: `${data.nopol}`, alignment: 'right' }
+            ], margin: [0, 0, 0, 25]
+        });
+
+        // Bagian terima kasih
+         content.push({
+          text: `TERIMA KASIH\n`, 
+          fontSize: 12, 
           alignment: 'center'
         });
 
+
          let docDefinition = {
-         
-          pageMargins: [15, 0, 15, 20],
+          // FIX: Mengatur pageSize ke lebar kertas struk termal (misalnya 264pt atau 70mm)
+          // dan mengatur tinggi menjadi null (auto)
+          pageSize: { width: 264, height: 'auto' }, // Lebar 70mm (~264pt)
+          pageMargins: [15, 15, 15, 15], // Margin sekeliling
           content: content,
           defaultStyle: {
-            fontSize: 27
+            fontSize: 12 
           }
         };
 
         const pdfDoc = pdfMake.createPdf(docDefinition);
+        
         if (downloadOnly) {
-          pdfDoc.download('struk.pdf');
+          // Download file. Karena pageSize diatur ke 'auto', file PDF akan menyesuaikan
+          // tinggi konten.
+          pdfDoc.download('struk_spbu.pdf');
         } else {
-          pdfDoc.open();
+          // Tampilkan di iframe (preview)
+          pdfDoc.getDataUrl(dataUrl => {
+            previewFrame.src = dataUrl;
+            
+            // NOTE: Meskipun PDF memiliki tinggi auto, iframe perlu bantuan JS 
+            // untuk mengatur tingginya karena masalah cross-origin.
+            // Panggilan resizeIframe() akan menangani ini setelah iframe memuat.
+          });
         }
     }
+
+    // Fungsi resize Iframe
+    function resizeIframe() {
+        // Cek jika konten iframe bisa diakses (ini sering gagal karena policy keamanan browser)
+        try {
+            if (previewFrame.contentWindow && previewFrame.contentWindow.document.body.scrollHeight) {
+                 // Coba atur tinggi berdasarkan tinggi konten PDF (sering diblokir)
+                previewFrame.style.height = (previewFrame.contentWindow.document.body.scrollHeight + 50) + 'px';
+            } else {
+                 // Fallback atau gunakan perkiraan yang besar
+                 previewFrame.style.height = '500px'; 
+            }
+        } catch (e) {
+             // Jika akses ditolak (paling umum untuk data URI PDF), gunakan nilai default
+             previewFrame.style.height = '500px'; 
+             console.log("Akses konten iframe diblokir, menggunakan tinggi default.");
+        }
+    }
+    
+    // Panggil resizeIframe setelah iframe selesai memuat konten PDF
+    previewFrame.onload = resizeIframe;
+
   </script>
 </body>
 </html>
-
-
-
-
-
-
-
